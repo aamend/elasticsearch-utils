@@ -23,7 +23,7 @@ class ReIndex extends LazyLogging {
   val cluster = config.getString("cluster")
   val timeValue = config.getInt("timeValue")
   val batchSize = config.getInt("batchSize")
-  val user = config.getString("user")
+  val username = config.getString("username")
   val password = config.getString("password")
 
   def process(fromIndexName: String, fromIndexType: String, toIndexName: String, toIndexType: String) = {
@@ -78,7 +78,7 @@ class ReIndex extends LazyLogging {
     val settings = Settings
       .settingsBuilder()
       .put("cluster.name", cluster)
-      .put("shield.user", s"$user:$password")
+      .put("shield.user", s"$username:$password")
       .build()
 
     val ta = new InetSocketTransportAddress(InetAddress.getByName(hostname), port)
