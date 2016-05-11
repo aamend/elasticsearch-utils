@@ -1,7 +1,7 @@
 # Elasticsearch Utils
 
 Mainly because I was fed up exporting and bulk inserting data into ES, a simple utility script that works on ES `2.3.2` with shield plugin enabled.
-Download index data as batch (using `scrolling` queries) where each batch can be re-indexed using `Bulk` load or appended to a "bulk-ready" file.
+Download index data as batch (using `scrolling` queries) where each batch can be re-indexed using `Bulk` load or exported to a "bulk-ready" file.
 
 ## Conf
 
@@ -18,8 +18,9 @@ Basic configuration in src/main/resources/application.conf
 Should you need to override configuration file at runtime
 
 ```sh
-java -Dconfig.file new-application.conf -jar elasticsearch-utils.jar
+java -Dconfig.file=/path/to/new/application.conf -jar elasticsearch-utils.jar
 ```
+
 ## Usage
 
 ```sh
