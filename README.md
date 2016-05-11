@@ -7,13 +7,13 @@ Download index data as batch (using `scrolling` queries) where each batch can be
 
 Basic configuration in src/main/resources/application.conf
 
-- host: the hostname of elasticsearch agent
-- port: the transport port to use (9300)
-- cluster: the cluster name to join
-- timeValue: the time value for scrolling query (60000)
-- batchSize: the batch size of each scroll (100)
-- username: the shield username (ignored if shield disabled)
-- password: the shield password (ignored if shield disabled)
+- `host`: the hostname of elasticsearch agent
+- `port`: the transport port to use (9300)
+- `cluster`: the cluster name to join
+- `timeValue`: the time value for scrolling query (60000)
+- `batchSize`: the batch size of each scroll (100)
+- `username`: the shield username (ignored if shield disabled)
+- `password`: the shield password (ignored if shield disabled)
 
 Should you need to override configuration file at runtime
 
@@ -34,7 +34,6 @@ usage: Utils
 ```
 
 Both the input and output indices (name/type) are required. 
-
 If `-o` option enabled, each batch is appended in the given output file using below "bulk-ready" format
 
 ```json
@@ -44,7 +43,11 @@ If `-o` option enabled, each batch is appended in the given output file using be
 {"Title":"Product 2", "Description":"Prodcut 2 Desctiption"}
 ```
 
-Output file can easily be re-imported on a different cluster using `bulk` load utility
+```sh
+java -jar elasticsearch-utils.jar --input-index index1/type1 --output-index index2/type2 --output-file /tmp/export.json
+```
+
+Output file can easily be re-imported on a different cluster using `_bulk` POST query.
 
 ```sh
 curl -s -XPOST localhost:9200/_bulk --data-binary "@outputFile.json"
@@ -53,7 +56,7 @@ curl -s -XPOST localhost:9200/_bulk --data-binary "@outputFile.json"
 If `-w` option is enabled, each batch goes straight to the provided index name/type of the **same elasticsearch instance** (useful for re-indexing data)
 
 ```sh
-java -jar elasticsearch-utils.jar --input-index index1/type1 --output-index index2/type2 --write --output-file /tmp/export.json
+java -jar elasticsearch-utils.jar --input-index index1/type1 --output-index index2/type2 -w
 ```
 
 ## Build
