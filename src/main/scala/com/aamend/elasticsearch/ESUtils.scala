@@ -32,7 +32,7 @@ class ESUtils extends LazyLogging {
 
   val token = basicAuthHeaderValue(username, new SecuredString(password.toCharArray))
 
-  def process(fromIndexName: String, fromIndexType: String, write: Boolean, toIndexName: String, toIndexType: String, outputFile: Option[String]) = {
+  def process(fromIndexName: String, fromIndexType: String, write: Boolean, toIndexName: Option[String], toIndexType: Option[String], outputFile: Option[String]) = {
 
     logger.info(s"Exporting data from $fromIndexName/$fromIndexType")
     logger.info(s"Batch size is $batchSize")
@@ -44,6 +44,7 @@ class ESUtils extends LazyLogging {
       logger.info(s"Exporting data to ${outputFile.get}")
 
     val client = getClient
+
     val qb = termQuery("_type", fromIndexType)
     var sr = client.prepareSearch(fromIndexName)
       .putHeader("Authorization", token)
@@ -53,6 +54,8 @@ class ESUtils extends LazyLogging {
       .execute()
       .actionGet()
 
+    val total = sr.getHits.getTotalHits
+
     var i = 0
     var documents = 0
     while(sr.hasNext) {
@@ -60,13 +63,13 @@ class ESUtils extends LazyLogging {
       i += 1
       val batch = sr.getBatchResponse
       documents += batch.length
-      logger.info(s"Batch $i - ${batch.length} documents extracted")
+      logger.info(s"Batch $i - $documents/$total")
 
-      if(write)
-        reImport(client, toIndexName, toIndexType, batch)
+      if(write && toIndexName.isDefined && toIndexType.isDefined)
+        reImport(client, toIndexName.get, toIndexType.get, batch)
 
       if(outputFile.isDefined)
-        appendToFile(outputFile.get, toIndexName, toIndexType, batch)
+        appendToFile(outputFile.get, batch)
 
       sr = client.prepareSearchScroll(sr.getScrollId)
         .putHeader("Authorization", token)
@@ -80,7 +83,7 @@ class ESUtils extends LazyLogging {
 
   }
 
-  private def appendToFile(outputFile: String, toIndexName: String, toIndexType: String,  batch: Array[(String, String)]) = {
+  private def appendToFile(outputFile: String,  batch: Array[(String, String)]) = {
 
     def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
       val p = new java.io.PrintWriter(new FileOutputStream(new File(outputFile), true))
@@ -89,7 +92,7 @@ class ESUtils extends LazyLogging {
 
     printToFile(new File(outputFile)) { p =>
       batch foreach { case (id, source) =>
-        val json = "{\"index\":{\"_index\":\"" + toIndexName + "\", \"_type\":\"" + toIndexType + "\", \"_id\": \"" + id + "\"}}"
+        val json = "{\"index\":{\"_id\": \"" + id + "\"}}"
         p.println(json)
         p.println(source)
       }

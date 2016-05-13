@@ -38,20 +38,20 @@ Both the input and output indices (name/type) are required.
 If `--output-file` option enabled, each batch is appended to the given output file using below "bulk-ready" format using the original document Id
 
 ```json
-{"index":{"_index":"index2", "_type":"type2", "_id": "1"}}
+{"index":{"_id": "1"}}
 {"Title":"Product 1", "Description":"Product 1 Description"}
-{"index":{"_index":"index2", "_type":"type2", "_id":"2"}}
+{"index":{"_id":"2"}}
 {"Title":"Product 2", "Description":"Product 2 Description"}
 ```
 
 ```sh
-java -jar elasticsearch-utils.jar --input-index index1/type1 --output-index index2/type2 --output-file /tmp/export.json
+java -jar elasticsearch-utils.jar --input-index index1/type1 --output-index index2/type2 --output-file /path/to/export.json
 ```
 
-Output file can easily be re-imported on a different cluster using `_bulk` POST query.
+Output file can easily be re-imported on a different cluster using `_bulk` query.
 
 ```sh
-curl -s -XPOST localhost:9200/_bulk --data-binary "@/tmp/export.json"
+curl -s -XPOST localhost:9200/indexName/indexType/_bulk --data-binary "@/path/to/export.json"
 ```
 
 If `--write` option is enabled, each batch goes straight to the provided index name/type of the **same elasticsearch instance** (useful for re-indexing data)
